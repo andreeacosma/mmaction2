@@ -100,6 +100,8 @@ def build_dataloader(dataset,
     init_fn = partial(
         worker_init_fn, num_workers=num_workers, rank=rank,
         seed=seed) if seed is not None else None
+        
+    print('Batch_size in builder.py is {}'.format(batch_size))
 
     data_loader = DataLoader(
         dataset,

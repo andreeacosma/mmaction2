@@ -58,28 +58,30 @@ model = dict(
             debug=False)),
     test_cfg=dict(rcnn=dict(action_thr=0.00)))
 
-dataset_type = 'AVADataset'
-data_root = 'data/ava/rawframes'
-anno_root = 'data/ava/annotations'
+dataset_type = 'UCFDataset'
+data_root = 'data/ucf101_24/rgb-images'
+anno_root = 'data/ucf101_24/annotations'
+
+label_file = f'{anno_root}/UCF_action_list.txt'
 
 #added chunk
-ann_file_train = f'{anno_root}/ava_train_chunk_v2.1.csv'
-ann_file_val = f'{anno_root}/ava_val_chunk_v2.1.csv'
+ann_file_train = f'{anno_root}/anno_train_chunk.csv'
+ann_file_val = f'{anno_root}/anno_val_chunk.csv'
 
-exclude_file_train = f'{anno_root}/ava_train_excluded_timestamps_v2.1.csv'
-exclude_file_val = f'{anno_root}/ava_val_excluded_timestamps_v2.1.csv'
+#exclude_file_train = f'{anno_root}/ava_train_excluded_timestamps_v2.1.csv'
+#exclude_file_val = f'{anno_root}/ava_val_excluded_timestamps_v2.1.csv'
 
-label_file = f'{anno_root}/ava_action_list_v2.1_for_activitynet_2018.pbtxt'
+#Added in train
+proposal_file_train = f'{anno_root}/UCF101v2-GT.pkl'
+proposal_file_val = f'{anno_root}/UCF101v2-GT.pkl'
 
-proposal_file_train = (f'{anno_root}/ava_dense_proposals_train.FAIR.'
-                       'recall_93.9.pkl')
-proposal_file_val = f'{anno_root}/ava_dense_proposals_val.FAIR.recall_93.9.pkl'
 
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_bgr=False)
 
 train_pipeline = [
-    dict(type='SampleAVAFrames', clip_len=32, frame_interval=2),
+    #dict(type='SampleFrames', clip_len=1, frame_interval=1),
+    dict(type='SampleUCFFrames', clip_len=32, frame_interval=1),
     dict(type='RawFrameDecode'),
     dict(type='RandomRescale', scale_range=(256, 320)),
     dict(type='RandomCrop', size=256),
@@ -97,11 +99,11 @@ train_pipeline = [
     dict(
         type='Collect',
         keys=['img', 'proposals', 'gt_bboxes', 'gt_labels'],
-        meta_keys=['scores', 'entity_ids'])
+        meta_keys=['scores'])
 ]
 # The testing is w/o. any cropping / flipping
 val_pipeline = [
-    dict(type='SampleAVAFrames', clip_len=32, frame_interval=2),
+    dict(type='SampleUCFFrames', clip_len=8, frame_interval=2),
     dict(type='RawFrameDecode'),
     dict(type='Resize', scale=(-1, 256)),
     dict(type='Normalize', **img_norm_cfg),
@@ -125,7 +127,7 @@ data = dict(
     train=dict(
         type=dataset_type,
         ann_file=ann_file_train,
-        exclude_file=exclude_file_train,
+        exclude_file=None,
         pipeline=train_pipeline,
         label_file=label_file,
         proposal_file=proposal_file_train,
@@ -134,7 +136,7 @@ data = dict(
     val=dict(
         type=dataset_type,
         ann_file=ann_file_val,
-        exclude_file=exclude_file_val,
+        exclude_file=None,
         pipeline=val_pipeline,
         label_file=label_file,
         proposal_file=proposal_file_val,
@@ -165,8 +167,8 @@ log_config = dict(
     ])
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = ('./work_dirs/ava/'
-            'slowfast_kinetics_pretrained_r50_4x16x1_20e_ava_rgb')
+work_dir = ('./work_dirs/ucf101/'
+            'slowfast_kinetics_pretrained_r50_4x16x1_20e_ucf101_rgb')
 load_from = ('https://download.openmmlab.com/mmaction/recognition/slowfast/'
              'slowfast_r50_4x16x1_256e_kinetics400_rgb/'
              'slowfast_r50_4x16x1_256e_kinetics400_rgb_20200704-bcde7ed7.pth')

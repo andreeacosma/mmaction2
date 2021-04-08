@@ -456,6 +456,56 @@ class SampleAVAFrames(SampleFrames):
 
 
 @PIPELINES.register_module()
+class SampleUCFFrames(SampleFrames):
+
+    def __init__(self, clip_len, frame_interval=1, test_mode=False):
+
+        super().__init__(clip_len, frame_interval, test_mode=test_mode)
+
+    def _get_centered_frames(self, timestamp, frame_ids, clip_len):
+        index, = np.where(frame_ids == timestamp)
+        frame_ids_len = len(frame_ids)
+
+        if (clip_len > index and clip_len < frame_ids_len):
+            centered_frames = frame_ids[:clip_len]
+        elif (clip_len / 2 + index > frame_ids_len):
+            centered_frames = frame_ids[-clip_len:]
+        else:
+            centered_frames = frame_ids[int(index - clip_len / 2):int(index + clip_len / 2)]
+
+        return centered_frames
+
+    def _get_frame_ids(self, folder_path):
+        import os
+        frame_ids =[]
+        for image in os.listdir(folder_path):
+            frame_ids.append(int(image[:-4]))
+        return frame_ids
+
+    def __call__(self, results):
+        timestamp = results['timestamp']
+        frame_dir = results['frame_dir']
+        frame_ind = self._get_frame_ids(frame_dir)
+
+        all_frames = np.array(frame_ind, dtype=np.int)
+        all_frames.sort()
+        results['frame_inds'] = self._get_centered_frames(timestamp, all_frames, self.clip_len)
+
+        results['clip_len'] = self.clip_len
+        #results['frame_interval'] = self.frame_interval
+        results['num_clips'] = 1
+        results['crop_quadruple'] = np.array([0, 0, 1, 1], dtype=np.float32)
+        return results
+
+    def __repr__(self):
+        repr_str = (f'{self.__class__.__name__}('
+                    f'clip_len={self.clip_len}, '
+                    f'frame_interval={self.frame_interval}, '
+                    f'test_mode={self.test_mode})')
+        return repr_str
+
+
+@PIPELINES.register_module()
 class SampleProposalFrames(SampleFrames):
     """Sample frames from proposals in the video.
 

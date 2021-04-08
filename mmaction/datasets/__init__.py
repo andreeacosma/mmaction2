@@ -14,11 +14,12 @@ from .rawframe_dataset import RawframeDataset
 from .rawvideo_dataset import RawVideoDataset
 from .ssn_dataset import SSNDataset
 from .video_dataset import VideoDataset
+from .ucf_dataset import UCFDataset
 
 __all__ = [
     'VideoDataset', 'build_dataloader', 'build_dataset', 'RepeatDataset',
     'RawframeDataset', 'BaseDataset', 'ActivityNetDataset', 'SSNDataset',
     'HVUDataset', 'AudioDataset', 'AudioFeatureDataset', 'ImageDataset',
     'RawVideoDataset', 'AVADataset', 'AudioVisualDataset',
-    'BaseMiniBatchBlending', 'CutmixBlending', 'MixupBlending'
+    'BaseMiniBatchBlending', 'CutmixBlending', 'MixupBlending','UCFDataset'
 ]
