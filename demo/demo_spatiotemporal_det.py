@@ -186,6 +186,7 @@ def frame_extraction(video_path):
     os.makedirs(target_dir, exist_ok=True)
     # Should be able to handle videos up to several hours
     frame_tmpl = osp.join(target_dir, 'img_{:06d}.jpg')
+    print("DEBUG frame_extraction: path {} exists {}".format(video_path, os.path.exists(video_path)))
     vid = cv2.VideoCapture(video_path)
     frames = []
     frame_paths = []
@@ -233,6 +234,7 @@ def load_label_map(file_path):
     Returns:
         dict: The label map (int -> label name).
     """
+    print("DEBUG load_label_map: path {} exists {}".format(file_path, os.path.exists(file_path)))
     lines = open(file_path).readlines()
     lines = [x.strip().split(': ') for x in lines]
     return {int(x[0]): x[1] for x in lines}
@@ -292,7 +294,8 @@ def main():
     # Get clip_len, frame_interval and calculate center index of each clip
     config = mmcv.Config.fromfile(args.config)
     val_pipeline = config['val_pipeline']
-    sampler = [x for x in val_pipeline if x['type'] == 'SampleAVAFrames'][0]
+    #sampler = [x for x in val_pipeline if x['type'] == 'SampleAVAFrames'][0]
+    sampler = [x for x in val_pipeline if x['type'] == 'SampleUCFFrames'][0]
     clip_len, frame_interval = sampler['clip_len'], sampler['frame_interval']
     window_size = clip_len * frame_interval
     assert clip_len % 2 == 0, 'We would like to have an even clip_len'
