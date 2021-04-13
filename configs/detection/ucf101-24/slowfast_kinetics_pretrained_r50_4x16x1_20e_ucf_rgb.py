@@ -65,8 +65,8 @@ anno_root = 'data/ucf101_24/annotations'
 label_file = f'{anno_root}/UCF_action_list.txt'
 
 #added chunk
-ann_file_train = f'{anno_root}/anno_train_chunk.csv'
-ann_file_val = f'{anno_root}/anno_val_chunk.csv'
+ann_file_train = f'{anno_root}/anno_train.csv'
+ann_file_val = f'{anno_root}/anno_val.csv'
 
 #exclude_file_train = f'{anno_root}/ava_train_excluded_timestamps_v2.1.csv'
 #exclude_file_val = f'{anno_root}/ava_val_excluded_timestamps_v2.1.csv'
