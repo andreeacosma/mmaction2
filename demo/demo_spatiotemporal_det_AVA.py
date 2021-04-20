@@ -55,7 +55,6 @@ plate_green = [hex2color(h) for h in plate_green]
 
 def visualize(frames, annotations, plate=plate_blue, max_num=5):
     """Visualize frames with predicted annotations.
-
     Args:
         frames (list[np.ndarray]): Frames for visualization, note that
             len(frames) % len(annotations) should be 0.
@@ -63,7 +62,6 @@ def visualize(frames, annotations, plate=plate_blue, max_num=5):
         plate (str): The plate used for visualization. Default: plate_blue.
         max_num (int): Max number of labels to visualize for a person box.
             Default: 5.
-
     Returns:
         list[np.ndarray]: Visualized frames.
     """
@@ -177,7 +175,6 @@ def parse_args():
 
 def frame_extraction(video_path):
     """Extract frames given video_path.
-
     Args:
         video_path (str): The video_path.
     """
@@ -186,7 +183,6 @@ def frame_extraction(video_path):
     os.makedirs(target_dir, exist_ok=True)
     # Should be able to handle videos up to several hours
     frame_tmpl = osp.join(target_dir, 'img_{:06d}.jpg')
-    print("DEBUG frame_extraction: path {} exists {}".format(video_path, os.path.exists(video_path)))
     vid = cv2.VideoCapture(video_path)
     frames = []
     frame_paths = []
@@ -204,11 +200,9 @@ def frame_extraction(video_path):
 
 def detection_inference(args, frame_paths):
     """Detect human boxes given frame paths.
-
     Args:
         args (argparse.Namespace): The arguments.
         frame_paths (list[str]): The paths of frames to do detection inference.
-
     Returns:
         list[np.ndarray]: The human detection results.
     """
@@ -227,14 +221,11 @@ def detection_inference(args, frame_paths):
 
 def load_label_map(file_path):
     """Load Label Map.
-
     Args:
         file_path (str): The file path of label map.
-
     Returns:
         dict: The label map (int -> label name).
     """
-    print("DEBUG load_label_map: path {} exists {}".format(file_path, os.path.exists(file_path)))
     lines = open(file_path).readlines()
     lines = [x.strip().split(': ') for x in lines]
     return {int(x[0]): x[1] for x in lines}
@@ -242,7 +233,6 @@ def load_label_map(file_path):
 
 def abbrev(name):
     """Get the abbreviation of label name:
-
     'take (an object) from (a person)' -> 'take ... from ...'
     """
     while name.find('(') != -1:
@@ -253,13 +243,11 @@ def abbrev(name):
 
 def pack_result(human_detection, result, img_h, img_w):
     """Short summary.
-
     Args:
         human_detection (np.ndarray): Human detection result.
         result (type): The predicted label of each human proposal.
         img_h (int): The image height.
         img_w (int): The image width.
-
     Returns:
         tuple: Tuple of human proposal, label name and label score.
     """
@@ -294,7 +282,6 @@ def main():
     # Get clip_len, frame_interval and calculate center index of each clip
     config = mmcv.Config.fromfile(args.config)
     val_pipeline = config['val_pipeline']
-    #sampler = [x for x in val_pipeline if x['type'] == 'SampleAVAFrames'][0]
     sampler = [x for x in val_pipeline if x['type'] == 'SampleAVAFrames'][0]
     clip_len, frame_interval = sampler['clip_len'], sampler['frame_interval']
     window_size = clip_len * frame_interval
@@ -321,6 +308,13 @@ def main():
     img_norm_cfg['std'] = np.array(img_norm_cfg['std'])
 
     # Build STDET model
+    try:
+        # In our spatiotemporal detection demo, different actions should have
+        # the same number of bboxes.
+        config['model']['test_cfg']['rcnn']['action_thr'] = .0
+    except KeyError:
+        pass
+
     config.model.backbone.pretrained = None
     model = build_detector(config.model, test_cfg=config.get('test_cfg'))
 
